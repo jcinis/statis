@@ -53,6 +53,14 @@ class Statis(object):
         return times
 
     @classmethod
+    def get_keys(cls, path="", starttime=None, endtime=None, depth=HOUR):
+        """Builds keys based on a path and time series"""
+        keys = cls.get_time_keys(starttime=starttime, endtime=endtime, depth=depth)
+        for i in range(0,len(keys)):
+            keys[i] = cls.mk_key(path, keys[i])
+        return keys
+
+    @classmethod
     def get_time_series(cls, dt=datetime.datetime.utcnow(), depth=SECOND):
         """Builds a tuple of strings to use for redis date key storage"""
 
@@ -151,7 +159,7 @@ class Statis(object):
 
         return pipeline.execute()
 
-    def fetch(self, path='', start=0, end=0, starttime=None, endtime=None, interval=HOUR, depth=MINUTE):
+    def fetch(self, path='', stats=[], start=0, end=0, starttime=None, endtime=None, interval=HOUR, depth=MINUTE):
         """Fetches a range of data by the given time intervals"""
 
         # Determine start and end dates by delta
@@ -163,8 +171,22 @@ class Statis(object):
         starttime = starttime or (datetime.datetime.utcnow() + start)
         endtime = endtime or (datetime.datetime.utcnow() + end)
 
-        # Get time keys
-        times = self.get_time_keys(starttime, endtime, depth)
+        # Get keys
+        keys = self.get_keys(path, starttime, endtime, depth)
 
-        return times
+        pipeline = self._redis.pipeline()
+        for key in keys:
+            if stats:
+                pipeline.hmget(key, stats)
+            else:
+                pipeline.hgetall(key)
+
+        values = pipeline.execute()
+        for i in range(0,len(values)):
+            if stats:
+                values[i].insert(0,keys[i].split(':')[-1])
+            else:
+                values[i]['_datekey'] = keys[i].split(':')[-1]
+
+        return values
 
