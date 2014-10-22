@@ -168,13 +168,3 @@ class Statis(object):
 
         return times
 
-
-class TrackerStats(Statis):
-
-    PREFIX = "tracker_stats"
-
-    def __init__(self):
-        self.connect(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
-
-
-
