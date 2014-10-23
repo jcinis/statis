@@ -20,12 +20,10 @@ class Statis(object):
 
     _redis = None
 
-    PREFIX = "redis_stats"
-    ADD_PREFIX = True
-
+    KEY_PREFIX     = "statis"
     PATH_DELIMITER = "/"
     TIME_DELIMITER = ":"
-
+    DATEKEY_NAME   = 'datekey'
 
     # CLASS METHODS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -57,7 +55,7 @@ class Statis(object):
         """Builds keys based on a path and time series"""
         keys = cls.get_time_keys(starttime=starttime, endtime=endtime, depth=depth)
         for i in range(0,len(keys)):
-            keys[i] = cls.mk_key(path, keys[i])
+            keys[i] = cls.make_key(path, keys[i])
         return keys
 
     @classmethod
@@ -84,8 +82,13 @@ class Statis(object):
         return tuple(rtn)
 
     @classmethod
-    def mk_key(cls, pathkey, timekey):
-        return "%s%s%s%s" % ((cls.ADD_PREFIX and cls.PREFIX+cls.PATH_DELIMITER or ''), pathkey, cls.TIME_DELIMITER, timekey)
+    def make_key(cls, pathkey, timekey):
+        return "%s%s%s%s" % (cls.KEY_PREFIX + cls.PATH_DELIMITER , pathkey, cls.TIME_DELIMITER, timekey)
+
+    @classmethod
+    def parse_key(cls, key):
+        """Returns a tuple of pathkey and timekey from a given key"""
+        return key.replace(cls.KEY_PREFIX + cls.PATH_DELIMITER, '', 1).split(cls.TIME_DELIMITER)
 
     @classmethod
     def get_key_series(cls, path='', dt=datetime.datetime.utcnow(), depth=HOUR):
@@ -97,7 +100,7 @@ class Statis(object):
         keys = []
         for pathkey in paths:
             for timekey in times:
-                keys.append(cls.mk_key(pathkey,timekey))
+                keys.append(cls.make_key(pathkey,timekey))
 
         return tuple(keys)
 
@@ -159,7 +162,39 @@ class Statis(object):
 
         return pipeline.execute()
 
-    def fetch(self, path='', stats=[], start=0, end=0, starttime=None, endtime=None, interval=HOUR, depth=MINUTE):
+    def fetch_stats(self, path='', stats=[], starttime=None, endtime=None, depth=HOUR):
+        """Fetches stats for a given time range and interval"""
+
+        # get keys
+        keys = self.get_keys(path, starttime, endtime, depth)
+
+        pipeline = self._redis.pipeline()
+        for key in keys:
+            pipeline.hmget(key, stats)
+
+        values = pipeline.execute()
+        for i in range(0,len(values)):
+            values[i].insert(0, self.parse_key(keys[i])[1])
+
+        return values
+
+    def fetch_all(self, path='', starttime=None, endtime=None, depth=HOUR):
+        """Fetches all stats for a given time range and interval"""
+
+        # get keys
+        keys = self.get_keys(path, starttime, endtime, depth)
+
+        pipeline = self._redis.pipeline()
+        for key in keys:
+            pipeline.hgetall(key)
+
+        values = pipeline.execute()
+        for i in range(0,len(values)):
+            values[i][self.DATEKEY_NAME] = self.parse_key(keys[i])[1]
+
+        return values
+
+    def fetch(self, path='', stats=[], starttime=None, endtime=None, depth=HOUR, start=0, end=0, interval=DAY) :
         """Fetches a range of data by the given time intervals"""
 
         # Determine start and end dates by delta
@@ -171,22 +206,8 @@ class Statis(object):
         starttime = starttime or (datetime.datetime.utcnow() + start)
         endtime = endtime or (datetime.datetime.utcnow() + end)
 
-        # Get keys
-        keys = self.get_keys(path, starttime, endtime, depth)
-
-        pipeline = self._redis.pipeline()
-        for key in keys:
-            if stats:
-                pipeline.hmget(key, stats)
-            else:
-                pipeline.hgetall(key)
-
-        values = pipeline.execute()
-        for i in range(0,len(values)):
-            if stats:
-                values[i].insert(0,keys[i].split(':')[-1])
-            else:
-                values[i]['_datekey'] = keys[i].split(':')[-1]
-
-        return values
+        if stats:
+            return self.fetch_stats(path=path, stats=stats, starttime=starttime, endtime=endtime, depth=MINUTE)
+        else:
+            return self.fetch_all(path=path, starttime=starttime, endtime=endtime, depth=MINUTE)
 
