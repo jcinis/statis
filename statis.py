@@ -168,9 +168,8 @@ class Statis(object):
         return pipeline.execute()
 
     @staticmethod
-    def hmget_to_integers(values):
+    def _hmget_to_integers(values):
         """Provides a callback to the redis hmget command and casts all results as integers"""
-
         for i in range(0,len(values)):
             values[i] = values[i] != None and int(values[i]) or  0
 
@@ -183,7 +182,7 @@ class Statis(object):
         keys = self.get_keys(path, starttime, endtime, depth)
 
         pipeline = self._redis.pipeline()
-        pipeline.set_response_callback('HMGET', self.hmget_to_integers)
+        pipeline.set_response_callback('HMGET', self._hmget_to_integers)
         for key in keys:
             pipeline.hmget(key, stats)
 
