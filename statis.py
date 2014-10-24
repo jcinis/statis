@@ -108,10 +108,16 @@ class Statis(object):
         """Breaks out the data paths to store in redis"""
 
         rtn = dict()
-        for key, value in stats.iteritems():
-            keys = cls.get_path_series(key)
-            for k in keys:
-                rtn[k] = value
+        if isinstance(stats,(list,tuple)):
+            for key in stats:
+                keys = cls.get_path_series(key)
+                for k in keys:
+                    rtn[k] = 1
+        else:
+            for key, value in stats.iteritems():
+                keys = cls.get_path_series(key)
+                for k in keys:
+                    rtn[k] = value
 
         return rtn
 
