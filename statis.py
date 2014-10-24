@@ -161,6 +161,15 @@ class Statis(object):
 
         return pipeline.execute()
 
+    @staticmethod
+    def hmget_to_integers(values):
+        """Provides a callback to the redis hmget command and casts all results as integers"""
+
+        for i in range(0,len(values)):
+            values[i] = values[i] != None and int(values[i]) or  0
+
+        return values
+
     def fetch_stats(self, path='', stats=[], starttime=None, endtime=None, depth=HOUR):
         """Fetches stats for a given time range and interval"""
 
@@ -168,6 +177,7 @@ class Statis(object):
         keys = self.get_keys(path, starttime, endtime, depth)
 
         pipeline = self._redis.pipeline()
+        pipeline.set_response_callback('HMGET', self.hmget_to_integers)
         for key in keys:
             pipeline.hmget(key, stats)
 
@@ -189,6 +199,8 @@ class Statis(object):
 
         values = pipeline.execute()
         for i in range(0,len(values)):
+            for k,v in values[i].iteritems():
+                values[i][k] = v.isdigit() and int(v) or v
             values[i][self.DATEKEY_NAME] = self.parse_key(keys[i])[1]
 
         return values
