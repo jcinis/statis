@@ -104,11 +104,11 @@ class Statis(object):
         return tuple(keys)
 
     @classmethod
-    def build_stat_dict(cls, data):
+    def build_stats_dict(cls, stats):
         """Breaks out the data paths to store in redis"""
 
         rtn = dict()
-        for key, value in data.iteritems():
+        for key, value in stats.iteritems():
             keys = cls.get_path_series(key)
             for k in keys:
                 rtn[k] = value
@@ -149,14 +149,14 @@ class Statis(object):
     def __init__(self, *args, **kargs):
         self.connect(*args, **kargs)
 
-    def store(self, path='', data=dict(), dt=datetime.datetime.utcnow(), depth=HOUR):
+    def store(self, path='', stats=dict(), dt=datetime.datetime.utcnow(), depth=HOUR):
         keys = self.get_key_series(path=path, dt=dt, depth=depth)
-        data = self.build_stat_dict(data)
+        data = self.build_stats_dict(stats)
 
         # do all the redis shit here
         pipeline = self._redis.pipeline()
         for key in keys:
-            for k,v in data.iteritems():
+            for k,v in stats.iteritems():
                 pipeline.hincrby(key, k, amount=v)
 
         return pipeline.execute()
