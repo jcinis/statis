@@ -3,7 +3,6 @@ import json
 import datetime
 
 from dateutil.relativedelta import relativedelta
-from trimtab import settings
 
 # TIME SERIES DEPTHS
 YEAR   = 0
