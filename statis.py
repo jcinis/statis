@@ -151,7 +151,7 @@ class Statis(object):
 
     def store(self, path='', stats=dict(), dt=datetime.datetime.utcnow(), depth=HOUR):
         keys = self.get_key_series(path=path, dt=dt, depth=depth)
-        data = self.build_stats_dict(stats)
+        stats = self.build_stats_dict(stats)
 
         # do all the redis shit here
         pipeline = self._redis.pipeline()
@@ -218,7 +218,7 @@ class Statis(object):
         endtime = endtime or (datetime.datetime.utcnow() + end)
 
         if stats:
-            return self.fetch_stats(path=path, stats=stats, starttime=starttime, endtime=endtime, depth=MINUTE)
+            return self.fetch_stats(path=path, stats=stats, starttime=starttime, endtime=endtime, depth=depth)
         else:
-            return self.fetch_all(path=path, starttime=starttime, endtime=endtime, depth=MINUTE)
+            return self.fetch_all(path=path, starttime=starttime, endtime=endtime, depth=depth)
 
