@@ -1,6 +1,7 @@
 import redis
 import json
 import datetime
+import logging
 
 from dateutil.relativedelta import relativedelta
 
@@ -201,6 +202,7 @@ class Statis(object):
         pipeline = self._redis.pipeline()
         for key in keys:
             pipeline.hgetall(key)
+            logging.debug('FETCHING ALL DATA IN %s' % key)
 
         values = pipeline.execute()
         for i in range(0,len(values)):
