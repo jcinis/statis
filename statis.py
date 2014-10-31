@@ -28,11 +28,11 @@ class Statis(object):
     # CLASS METHODS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
     @classmethod
-    def get_time_key(cls, dt=datetime.datetime.now(), depth=SECOND):
+    def get_timekey(cls, dt=datetime.datetime.now(), depth=SECOND):
         return dt.strftime('%Y%m%d%H%M%S')[0:TIME_LEN[depth]]
 
     @classmethod
-    def get_time_keys(cls, starttime=None, endtime=None, depth=HOUR):
+    def get_timekeys(cls, starttime=None, endtime=None, depth=HOUR):
 
         # Begin iterating on start datetime
         time = starttime
@@ -40,7 +40,7 @@ class Statis(object):
         # Iterate to build time keys
         times = []
         while True:
-            times.append(cls.get_time_key(time, depth))
+            times.append(cls.get_timekey(time, depth))
 
             # Iterate on timedelta
             time =  time + cls.timedelta(1, depth)
@@ -51,9 +51,28 @@ class Statis(object):
         return times
 
     @classmethod
+    def timekey_to_datetime(cls, timekey):
+
+        rtn = None
+        if len(timekey) == 4:
+            rtn = datetime.datetime(int(timekey[0:4]),1,1,0,0,0)
+        elif len(timekey) == 6:
+            rtn = datetime.datetime(int(timekey[0:4]),int(timekey[4:6]),1,0,0,0)
+        elif len(timekey) == 8:
+            rtn = datetime.datetime(int(timekey[0:4]),int(timekey[4:6]),int(timekey[6:8]),0,0,0)
+        elif len(timekey) == 10:
+            rtn = datetime.datetime(int(timekey[0:4]),int(timekey[4:6]),int(timekey[6:8]),int(timekey[8:10]),0,0)
+        elif len(timekey) == 12:
+            rtn = datetime.datetime(int(timekey[0:4]),int(timekey[4:6]),int(timekey[6:8]),int(timekey[8:10]),int(timekey[10:12]),0)
+        elif len(timekey) == 14:
+            rtn = datetime.datetime(int(timekey[0:4]),int(timekey[4:6]),int(timekey[6:8]),int(timekey[8:10]),int(timekey[10:12]),int(timekey[12:14]))
+
+        return rtn
+
+    @classmethod
     def get_keys(cls, path="", starttime=None, endtime=None, depth=HOUR):
         """Builds keys based on a path and time series"""
-        keys = cls.get_time_keys(starttime=starttime, endtime=endtime, depth=depth)
+        keys = cls.get_timekeys(starttime=starttime, endtime=endtime, depth=depth)
         for i in range(0,len(keys)):
             keys[i] = cls.make_key(path, keys[i])
         return keys
