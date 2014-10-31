@@ -182,7 +182,7 @@ import logging
 
 REDIS_HOST = '192.168.9.42'
 REDIS_PORT = 6379
-REDIS_DB = 11
+REDIS_DB = 12
 
 def _load_test_data_parse_line(line):
 
@@ -222,7 +222,7 @@ def _load_test_data_parse_line(line):
 
     return kargs
 
-def load_test_data(path, limit=10000):
+def load_test_data(path, limit=10000, depth=statis.HOUR):
 
     # Start time
     starttime = datetime.datetime.utcnow()
@@ -254,7 +254,7 @@ def load_test_data(path, limit=10000):
         #if r['respondent_id']: print r['respondent_id']
 
         # store stats
-        stats.store(path, stat, dt=r['created_dt'], depth=statis.HOUR)
+        stats.store(path, stat, dt=r['created_dt'], depth=depth)
 
         # if limit exists break on limit
         if limit and i >= limit:
@@ -277,15 +277,16 @@ def load_test_data(path, limit=10000):
 
 if __name__ == "__main__":
 
-    #path = "data/20141013_0001_part_00"
-    #load_test_data(path, limit=0)
+    path = "data/20141013_0000_part_00"
+    load_test_data(path, limit=0, depth=statis.MINUTE)
 
     logging.basicConfig(level="DEBUG")
 
+    '''
     # connect to statis
     stats = statis.Statis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
     hourly = stats.fetch_stats(
-            path='161bdadb-1a5e-462e-93b7-45b70e28ae28/N37601.131803TURNINC',
+            path='161bdadb-1a5e-462e-93b7-45b70e28ae28',
             stats=['impressions','respondents'],
             starttime=datetime.datetime(2014,10,13,0,0),
             endtime=datetime.datetime(2014,10,14,0,0),
@@ -301,3 +302,5 @@ if __name__ == "__main__":
         })
         rtn.append(record)
         print "%s\t%s\t%s\t%s" % (record['hour'], record['impressions'], record['respondents'], record['ratio'])
+    '''
+
