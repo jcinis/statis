@@ -25,6 +25,8 @@ class Statis(object):
     TIME_DELIMITER = ":"
     DATEKEY_NAME   = 'datekey'
 
+    TIMEKEY_LIMIT = 3601 # 1 hour in seconds (if 0 then no-limit)
+
     # CLASS METHODS :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
     @classmethod
@@ -32,21 +34,26 @@ class Statis(object):
         return dt.strftime('%Y%m%d%H%M%S')[0:TIME_LEN[depth]]
 
     @classmethod
-    def get_timekeys(cls, starttime=None, endtime=None, depth=HOUR):
+    def get_timekeys(cls, starttime=None, endtime=None, depth=HOUR, limit=3601):
 
         # Begin iterating on start datetime
         time = starttime
 
         # Iterate to build time keys
         times = []
+        i = 1
         while True:
             times.append(cls.get_timekey(time, depth))
 
             # Iterate on timedelta
-            time =  time + cls.timedelta(1, depth)
+            time = time + cls.timedelta(1, depth)
 
             # Break if passing the end datetime
             if time > endtime: break;
+
+            # Break if we hit our safety limit
+            if limit and i >= limit: break;
+            i += 1
 
         return times
 
@@ -75,6 +82,7 @@ class Statis(object):
         keys = cls.get_timekeys(starttime=starttime, endtime=endtime, depth=depth)
         for i in range(0,len(keys)):
             keys[i] = cls.make_key(path, keys[i])
+
         return keys
 
     @classmethod
