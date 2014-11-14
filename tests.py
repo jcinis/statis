@@ -173,12 +173,13 @@ print results
 	"""
 
 '''
-
+'''
 import datetime
 import statis
 import sys
 import json
 import logging
+
 
 REDIS_HOST = '192.168.9.42'
 REDIS_PORT = 6379
@@ -248,7 +249,8 @@ def load_test_data(path, limit=10000, depth=statis.HOUR):
 
         # build stats array
         stat = ['impressions',]
-        if r['respondent_id']: stat.append('respondents')
+        if r['respondent_id']:
+            stat.append('respondents')
 
         #print path, stats
         #if r['respondent_id']: print r['respondent_id']
@@ -274,14 +276,16 @@ def load_test_data(path, limit=10000, depth=statis.HOUR):
 
     # return the number of imported records
     return i
+'''
 
 if __name__ == "__main__":
+    '''
 
     path = "data/20141013_0000_part_00"
     load_test_data(path, limit=0, depth=statis.MINUTE)
 
     logging.basicConfig(level="DEBUG")
-
+    '''
     '''
     # connect to statis
     stats = statis.Statis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
