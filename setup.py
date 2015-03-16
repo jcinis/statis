@@ -3,14 +3,14 @@
 from setuptools import setup, find_packages
 
 setup(name="statis",
-      version="0.0.1",
-      description="Redis-based timeseries database",
+      version="0.0.2",
+      description="Flexible time-series stat tracking for redis",
       author="Jessey White-Cinis",
       author_email="j@cin.is",
       url="http://github.com/jcinis/statis",
       packages = find_packages(),
       license = "MIT License",
-      install_requires=['simplejson>=2.1.6'],
-      keywords="transloadit",
+      install_requires=['redis>=2.10.2'],
+      keywords="statis",
       zip_safe = True,
       tests_require=['nose', 'coverage'])

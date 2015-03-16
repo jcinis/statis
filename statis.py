@@ -1,5 +1,6 @@
 import redis
 import json
+import urllib
 import datetime
 import logging
 
@@ -97,6 +98,14 @@ class Statis(object):
             dt.strftime('%Y%m%d%H%M'),
             dt.strftime('%Y%m%d%H%M%S')
             )[0:depth+1]
+
+    @classmethod
+    def make_path(cls, *args):
+        """Builds a storage path with correct serialization from a list of parts"""
+        parts = list(args)
+        for i in range(len(parts)):
+            parts[i] = parts[i] and urllib.quote_plus(parts[i]) or ''
+        return parts and '/'.join(parts) or ''
 
     @classmethod
     def get_path_series(cls, path=''):
