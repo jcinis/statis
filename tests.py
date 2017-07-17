@@ -1,3 +1,25 @@
+from datetime import datetime
+from redis import Redis
+
+redis = Redis(host='statis-redis', port=6379)
+
+now = datetime.utcnow().isoformat()
+print("\n\nhello statis\n%s\n\n" % now)
+
+
+count = redis.incr('hits')
+count = redis.incr('hits')
+count = redis.incr('hits')
+count = redis.incr('hits')
+count = redis.incr('hits')
+
+
+print('Hello World! I have been seen {} times.\n'.format(count))
+print("\n\n")
+
+
+
+
 '''
 
 import datetime
@@ -172,8 +194,6 @@ print results
 	['d0314f3c-4fb4-469f-8bbe-5cf6812183e1', '161bdadb-1a5e-462e-93b7-45b70e28ae28', '38bc8a9e-4a2d-40c3-9ddd-6fd7290080ed', '0', '', '', '111977682', '8248251', 'N37601.152854POPSUGARMEDIASUGARI', '59815312', '2497145872907894921', 'NA', 'NA', 'NA', 'NA', 'NA', '2014-10-13 00:02:22']
 	"""
 
-'''
-'''
 import datetime
 import statis
 import sys
@@ -276,17 +296,13 @@ def load_test_data(path, limit=10000, depth=statis.HOUR):
 
     # return the number of imported records
     return i
-'''
 
 if __name__ == "__main__":
-    '''
 
     path = "data/20141013_0000_part_00"
     load_test_data(path, limit=0, depth=statis.MINUTE)
 
     logging.basicConfig(level="DEBUG")
-    '''
-    '''
     # connect to statis
     stats = statis.Statis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
     hourly = stats.fetch_stats(
@@ -306,5 +322,5 @@ if __name__ == "__main__":
         })
         rtn.append(record)
         print "%s\t%s\t%s\t%s" % (record['hour'], record['impressions'], record['respondents'], record['ratio'])
-    '''
+'''
 
