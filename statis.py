@@ -104,7 +104,7 @@ class Statis(object):
         """Builds a storage path with correct serialization from a list of parts"""
         parts = list(args)
         for i in range(len(parts)):
-            parts[i] = parts[i] and urllib.quote_plus(parts[i]) or ''
+            parts[i] = parts[i] and urllib.parse.quote_plus(parts[i]) or ''
         return parts and '/'.join(parts) or ''
 
     @classmethod
@@ -151,7 +151,7 @@ class Statis(object):
                 for k in keys:
                     rtn[k] = 1
         else:
-            for key, value in stats.iteritems():
+            for key, value in stats.items():
                 keys = cls.get_path_series(key)
                 for k in keys:
                     rtn[k] = value
@@ -199,7 +199,7 @@ class Statis(object):
         # do all the redis shit here
         pipeline = self._redis.pipeline()
         for key in keys:
-            for k,v in stats.iteritems():
+            for k,v in stats.items():
                 pipeline.hincrby(key, k, amount=v)
 
         return pipeline.execute()
@@ -240,13 +240,16 @@ class Statis(object):
             pipeline.hgetall(key)
             logging.debug('FETCHING ALL DATA IN %s' % key)
 
+        rtn = []
         values = pipeline.execute()
         for i in range(0,len(values)):
-            for k,v in values[i].iteritems():
-                values[i][k] = v.isdigit() and int(v) or v
-            values[i][self.DATEKEY_NAME] = self.parse_key(keys[i])[1]
+            interval = {}
+            for k,v in values[i].items():
+                interval[k.decode()] = v.isdigit() and int(v) or v
+            interval[self.DATEKEY_NAME] = self.parse_key(keys[i])[1]
+            rtn.append(interval)
 
-        return values
+        return rtn
 
     def fetch(self, path='', stats=[], starttime=None, endtime=None, depth=HOUR, start=0, end=0, interval=DAY) :
         """Fetches a range of data by the given time intervals"""
