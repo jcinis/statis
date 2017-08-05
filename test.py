@@ -1,3 +1,4 @@
+import os
 import unittest
 import logging
 import datetime
@@ -5,8 +6,8 @@ import statis
 import json
 from dateutil.parser import parse
 
-REDIS_HOST = 'statis-redis'
-REDIS_PORT = '6379'
+REDIS_HOST = os.environ.get('STATIS_REDIS_HOST','statis-redis')
+REDIS_PORT = os.environ.get('STATIS_REDIS_PORT','6379')
 
 class StatisTestCase(unittest.TestCase):
 
@@ -45,10 +46,8 @@ class StatisTestCase(unittest.TestCase):
         '20160131':14,
     }
 
-    def __init__(self, *args, **kwargs):
-        super(StatisTestCase, self).__init__(*args, **kwargs)
-
-        print("RUNNING INIT!!!")
+    def setUp(self):
+        '''Loading data into statis'''
 
         self.stats = statis.Statis(host=REDIS_HOST, port=REDIS_PORT)
         statis.Statis.KEY_PREFIX = 'test'
@@ -82,7 +81,6 @@ class StatisTestCase(unittest.TestCase):
                 self.stats.timekey_to_datetime(day.get('datekey')),
                 day.get('datekey'),
                 day.get('sighting',''),
-                day.get('shapes/circle',0),
             )
 
             self.assertEqual(
