@@ -9,19 +9,27 @@ image:
 	docker build -f Dockerfile -t $(IMAGE):$(VERSION) ./
 	docker tag $(IMAGE):$(VERSION) $(IMAGE):latest
 
-run: image
+run:
+	make image
+	make start-redis
 	docker run \
 		--rm \
 		--name statis \
 		-p 5000:5000 \
+		--link statis-redis:redis \
 		-it $(IMAGE):$(VERSION)
+	make stop-redis
 
-shell: image
+shell:
+	make image
+	make start-redis
 	docker run \
 		--rm \
 		--name statis-shell \
+		--link statis-redis:redis \
 		-it $(IMAGE):$(VERSION) \
 		/bin/sh
+	make stop-redis
 
 test:
 	make image
