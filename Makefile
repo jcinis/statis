@@ -38,6 +38,8 @@ test:
 		--rm \
 		--name statis-test \
 		--link statis-redis:redis \
+		-e "STATIS_REDIS_HOST=statis-redis" \
+		-e "STATIS_REDIS_PORT=6379" \
 		-it $(IMAGE):$(VERSION) \
 		python test.py
 	make stop-redis
