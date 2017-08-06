@@ -1,4 +1,4 @@
-.PHONY: image run shell test start-redis stop-redis
+.PHONY: image shell test start-redis stop-redis
 
 IMAGE := jcinis/statis
 VERSION := 1.0
@@ -8,17 +8,6 @@ PWD := $(dir $(MAKEPATH))
 image:
 	docker build -f Dockerfile -t $(IMAGE):$(VERSION) ./
 	docker tag $(IMAGE):$(VERSION) $(IMAGE):latest
-
-run:
-	make image
-	make start-redis
-	docker run \
-		--rm \
-		--name statis \
-		-p 5000:5000 \
-		--link statis-redis:redis \
-		-it $(IMAGE):$(VERSION)
-	make stop-redis
 
 shell:
 	make image
