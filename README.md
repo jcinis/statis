@@ -1,11 +1,17 @@
-statis
+Statis
 ======
 
-Flexible time-series stat tracking for python and redis.
+A flexible real-time stat tracking library for python and redis.
 
-Heavily inspired by Redistat:
+Statis aims to offer a very simple way to get started with fixed-bucket aggregation. Counters are multi-dimensional using paths and each statistic can be aggregated at different levels of resolution (YEAR, MONTH, DAY, HOUR (default), MINUTE, SECOND).
+
+Statis was heavily inspired by Redistat:
 https://github.com/jimeh/redistat
 
+## Requirements
+- Python 3
+- Redis
+- Docker (optional)
 
 ## Usage
 ```
@@ -24,7 +30,6 @@ data = stats.fetch(
     depth=statis.DAY
 )
 print(json.dumps(data, indent=4))
-
 ```
 
 Returns:
